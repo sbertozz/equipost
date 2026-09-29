@@ -1,0 +1,1670 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
+    <!-- iOS PWA / Home Screen Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="EquiBanco">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4f46e5">
+    
+    <title>EquiBanco - App Assegnazione Banchi</title>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-gradient: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            --secondary: #0284c7;
+            --success: #16a34a;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-title: #0f172a;
+            --text-body: #334155;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --ios-radius: 14px;
+            --safe-bottom: env(safe-area-inset-bottom, 16px);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg-page);
+            color: var(--text-body);
+            padding-bottom: calc(var(--safe-bottom) + 80px);
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* iOS Navigation Bar */
+        .ios-navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 0.5px solid rgba(0,0,0,0.12);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .brand-icon {
+            width: 36px;
+            height: 36px;
+            background: var(--primary-gradient);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 1.05rem;
+            box-shadow: 0 3px 8px rgba(79, 70, 229, 0.35);
+        }
+
+        .brand-text h1 {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-title);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+        }
+
+        .brand-text span {
+            font-size: 0.68rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .navbar-actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn-ios-small {
+            background: #f1f5f9;
+            border: 1px solid var(--border);
+            padding: 6px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-title);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn-ios-small:active {
+            background: #e2e8f0;
+            transform: scale(0.96);
+        }
+
+        /* Banner per installazione su iPhone */
+        .pwa-install-banner {
+            background: #1e1b4b;
+            color: white;
+            margin: 10px 14px 0;
+            padding: 12px 14px;
+            border-radius: var(--ios-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 12px rgba(30, 27, 75, 0.25);
+        }
+
+        .pwa-text {
+            font-size: 0.78rem;
+            line-height: 1.35;
+        }
+
+        .pwa-text strong {
+            display: block;
+            color: #38bdf8;
+            font-size: 0.82rem;
+            margin-bottom: 2px;
+        }
+
+        /* Stats Bar Widget */
+        .stats-widget {
+            background: white;
+            margin: 10px 14px 12px;
+            padding: 10px;
+            border-radius: var(--ios-radius);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            border: 1px solid var(--border);
+        }
+
+        .stat-cell {
+            text-align: center;
+            background: #f8fafc;
+            padding: 8px 4px;
+            border-radius: 10px;
+        }
+
+        .stat-val {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--primary);
+            line-height: 1.2;
+        }
+
+        .stat-lbl {
+            font-size: 0.6rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+            margin-top: 2px;
+        }
+
+        /* iOS Segmented Control */
+        .segmented-control {
+            background: #e2e8f0;
+            padding: 3px;
+            border-radius: 11px;
+            display: flex;
+            margin: 0 14px 14px;
+        }
+
+        .segment-btn {
+            flex: 1;
+            background: transparent;
+            border: none;
+            padding: 7px 10px;
+            font-size: 0.76rem;
+            font-weight: 700;
+            color: #64748b;
+            border-radius: 9px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        .segment-btn.active {
+            background: white;
+            color: var(--text-title);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.08);
+        }
+
+        /* Main Container */
+        .app-body {
+            padding: 0 14px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Quick Action Banner */
+        .action-banner {
+            background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+            border: 1px solid #c7d2fe;
+            border-radius: var(--ios-radius);
+            padding: 12px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .action-banner-text {
+            font-size: 0.78rem;
+            color: #3730a3;
+            line-height: 1.3;
+        }
+
+        .action-banner-text strong {
+            display: block;
+            font-size: 0.85rem;
+            margin-bottom: 2px;
+        }
+
+        .btn-calc-big {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 12px;
+            font-size: 0.82rem;
+            font-weight: 800;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 3px 8px rgba(79, 70, 229, 0.35);
+            white-space: nowrap;
+        }
+
+        .btn-calc-big:active {
+            transform: scale(0.96);
+        }
+
+        /* Mobile Seating Row Section */
+        .row-section {
+            background: white;
+            border-radius: var(--ios-radius);
+            padding: 14px;
+            margin-bottom: 14px;
+            border: 1px solid var(--border);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        }
+
+        .row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+
+        .row-title {
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--text-title);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .row-badge {
+            font-size: 0.68rem;
+            font-weight: 800;
+            padding: 2px 7px;
+            border-radius: 6px;
+        }
+
+        .row-c-badge { background: #fee2e2; color: #991b1b; }
+        .row-b-badge { background: #fef3c7; color: #92400e; }
+        .row-a-badge { background: #dcfce7; color: #166534; }
+
+        .desk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(92px, 1fr));
+            gap: 8px;
+        }
+
+        /* Desk Card */
+        .desk-item {
+            background: #f8fafc;
+            border: 1.5px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 7px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 82px;
+        }
+
+        .desk-item:active {
+            transform: scale(0.95);
+        }
+
+        .desk-item.selected-swap {
+            border-color: var(--warning) !important;
+            background: #fef3c7 !important;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.4);
+            transform: scale(1.02);
+            animation: pulseCard 1s infinite alternate;
+        }
+
+        @keyframes pulseCard {
+            from { transform: scale(1); }
+            to { transform: scale(1.03); }
+        }
+
+        .desk-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2px;
+        }
+
+        .desk-code {
+            font-size: 0.68rem;
+            font-weight: 900;
+            background: #0f172a;
+            color: white;
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+
+        .score-pill {
+            font-size: 0.66rem;
+            font-weight: 800;
+            padding: 1px 5px;
+            border-radius: 4px;
+        }
+
+        .sc-low { background: #fee2e2; color: #991b1b; }
+        .sc-mid { background: #fef3c7; color: #92400e; }
+        .sc-high { background: #e0f2fe; color: #075985; }
+        .sc-top { background: #dcfce7; color: #166534; font-weight: 900; }
+        .sc-10 { background: #bbf7d0; color: #14532d; border: 1.5px solid #16a34a; font-weight: 900; }
+
+        .desk-student {
+            font-size: 0.78rem;
+            font-weight: 800;
+            color: var(--text-title);
+            margin: 3px 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            line-height: 1.2;
+        }
+
+        .tag-front {
+            font-size: 0.58rem;
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 0 4px;
+            border-radius: 3px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .desk-bot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.6rem;
+            border-top: 1px dashed #cbd5e1;
+            padding-top: 3px;
+            color: var(--text-muted);
+        }
+
+        .desk-bot .m-val {
+            font-weight: 700;
+            color: var(--text-title);
+        }
+
+        .diff-tag {
+            font-weight: 800;
+            padding: 0 3px;
+            border-radius: 3px;
+        }
+
+        .diff-p { background: #dcfce7; color: #166534; }
+        .diff-n { background: #fee2e2; color: #991b1b; }
+        .diff-z { background: #f1f5f9; color: #64748b; }
+
+        /* Full Interactive Map View */
+        .blackboard-box {
+            background: #1e293b;
+            color: white;
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+            font-weight: 800;
+        }
+
+        .teacher-box {
+            background: #9a3412;
+            color: white;
+            padding: 3px 12px;
+            border-radius: 6px;
+            font-size: 0.72rem;
+        }
+
+        .map-horizontal-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 8px;
+        }
+
+        .canvas-grid {
+            min-width: 620px;
+            background: #f8fafc;
+            border: 2px dashed #cbd5e1;
+            border-radius: var(--ios-radius);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .canvas-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .canvas-row-label {
+            width: 50px;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #64748b;
+            text-transform: uppercase;
+            text-align: center;
+        }
+
+        .canvas-block {
+            display: flex;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: 10px;
+            gap: 4px;
+            border: 1.5px solid #cbd5e1;
+        }
+
+        .aisle {
+            font-size: 0.65rem;
+            font-weight: 900;
+            color: #94a3b8;
+            padding: 0 4px;
+        }
+
+        /* Student List Elements */
+        .student-card {
+            background: white;
+            border-radius: var(--ios-radius);
+            padding: 12px 14px;
+            border: 1px solid var(--border);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .student-card-name {
+            font-size: 0.88rem;
+            font-weight: 800;
+            color: var(--text-title);
+            margin-bottom: 2px;
+        }
+
+        .student-card-sub {
+            font-size: 0.72rem;
+            color: var(--text-muted);
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .seat-badge {
+            background: #e0e7ff;
+            color: #3730a3;
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-weight: 800;
+            font-size: 0.7rem;
+        }
+
+        .student-stat {
+            text-align: right;
+        }
+
+        .student-stat-val {
+            font-size: 1rem;
+            font-weight: 900;
+            color: var(--text-title);
+        }
+
+        .student-stat-diff {
+            font-size: 0.68rem;
+            font-weight: 800;
+        }
+
+        /* Bottom Floating Swap Bar */
+        .swap-bar {
+            position: fixed;
+            bottom: calc(var(--safe-bottom) + 68px);
+            left: 14px;
+            right: 14px;
+            background: #1e293b;
+            color: white;
+            padding: 12px 14px;
+            border-radius: var(--ios-radius);
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.35);
+            z-index: 90;
+            animation: slideUp 0.25s ease-out;
+        }
+
+        .swap-bar.active {
+            display: flex;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* iOS Bottom Tab Bar */
+        .ios-tabbar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 0.5px solid rgba(0,0,0,0.12);
+            padding: 8px 12px calc(var(--safe-bottom) + 6px);
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 60;
+        }
+
+        .tab-item {
+            background: none;
+            border: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            color: #64748b;
+            font-size: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
+            padding: 2px 12px;
+            transition: all 0.15s;
+        }
+
+        .tab-item.active {
+            color: var(--primary);
+        }
+
+        .tab-item svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        /* Toast Notifications */
+        .ios-toast {
+            position: fixed;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #1e293b;
+            color: white;
+            padding: 10px 18px;
+            border-radius: 30px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+            z-index: 100;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .ios-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* Modal Bottom Sheet */
+        .sheet-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: flex-end;
+            z-index: 100;
+        }
+
+        .sheet-overlay.active {
+            display: flex;
+        }
+
+        .bottom-sheet {
+            background: white;
+            width: 100%;
+            border-radius: 20px 20px 0 0;
+            padding: 20px 16px calc(var(--safe-bottom) + 20px);
+            max-height: 85vh;
+            overflow-y: auto;
+            animation: sheetIn 0.25s ease-out;
+        }
+
+        @keyframes sheetIn {
+            from { transform: translateY(100%); }
+            to { transform: translateY(0); }
+        }
+
+        .sheet-handle {
+            width: 38px;
+            height: 5px;
+            background: #cbd5e1;
+            border-radius: 9999px;
+            margin: 0 auto 16px;
+        }
+
+        .sheet-title {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: var(--text-title);
+            margin-bottom: 6px;
+        }
+
+        .sheet-sub {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 14px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            background: #f8fafc;
+            color: var(--text-title);
+            margin-bottom: 14px;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .btn-sheet-primary {
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 800;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .btn-sheet-secondary {
+            background: #f1f5f9;
+            color: var(--text-title);
+            border: 1px solid var(--border);
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            width: 100%;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        /* Step Guide in Modal */
+        .step-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+        }
+
+        .step-num {
+            width: 28px;
+            height: 28px;
+            background: var(--primary);
+            color: white;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 0.85rem;
+            flex-shrink: 0;
+        }
+
+        .step-text {
+            font-size: 0.82rem;
+            color: var(--text-title);
+            line-height: 1.35;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- iOS Toast Notification -->
+    <div id="toast" class="ios-toast">
+        <span id="toast-icon">✨</span>
+        <span id="toast-msg">Notifica</span>
+    </div>
+
+    <!-- Navigation Bar -->
+    <nav class="ios-navbar">
+        <div class="navbar-brand">
+            <div class="brand-icon">EB</div>
+            <div class="brand-text">
+                <h1>EquiBanco</h1>
+                <span>Aula Reale &bull; 23 Posti</span>
+            </div>
+        </div>
+        <div class="navbar-actions">
+            <button class="btn-ios-small" onclick="openInstallSheet()">
+                📲 Installa
+            </button>
+            <button class="btn-ios-small" onclick="openNamesModal()">
+                📋 Nomi
+            </button>
+        </div>
+    </nav>
+
+    <!-- Banner Istruzioni iPhone Home -->
+    <div class="pwa-install-banner" onclick="openInstallSheet()">
+        <div class="pwa-text">
+            <strong>📲 Vuoi questa App sulla schermata Home?</strong>
+            Tocca qui per scoprire come averla a schermo intero come una vera App!
+        </div>
+        <div style="font-size:1.4rem;">👉</div>
+    </div>
+
+    <!-- Top Stats Bar -->
+    <div class="stats-widget">
+        <div class="stat-cell">
+            <div class="stat-val" id="stat-students">23</div>
+            <div class="stat-lbl">Studenti</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-val" id="stat-mean">6.46</div>
+            <div class="stat-lbl">Media Aula</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-val" id="stat-fairness" style="color:var(--success);">98.5%</div>
+            <div class="stat-lbl">Equità</div>
+        </div>
+        <div class="stat-cell">
+            <div class="stat-val" id="stat-round">Turno 3</div>
+            <div class="stat-lbl">Rotazione</div>
+        </div>
+    </div>
+
+    <!-- Segmented Navigation Control -->
+    <div class="segmented-control">
+        <button class="segment-btn active" onclick="switchNavTab('tab-seating', event)">🪑 Piantina Banchi</button>
+        <button class="segment-btn" onclick="switchNavTab('tab-students', event)">👥 Studenti (23)</button>
+        <button class="segment-btn" onclick="switchNavTab('tab-scores', event)">⭐ Voti dal Foglio</button>
+    </div>
+
+    <!-- App Main Body -->
+    <main class="app-body">
+
+        <!-- TAB 1: Piantina Banchi -->
+        <div id="tab-seating" class="tab-content active">
+
+            <!-- Action Banner -->
+            <div class="action-banner">
+                <div class="action-banner-text">
+                    <strong>⚡ Algoritmo Equo Pronto</strong>
+                    Tocca 2 banchi per scambiarli o calcola l'ottimo.
+                </div>
+                <button class="btn-calc-big" onclick="triggerOptimization()">
+                    ⚡ Ricalcola
+                </button>
+            </div>
+
+            <!-- View Switcher (Schede iPhone vs Mappa Panoramica) -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size:0.8rem; font-weight:800; color:#475569; text-transform:uppercase;">Disposizione Aula</span>
+                <div style="display:flex; gap:4px; background:#e2e8f0; padding:2px; border-radius:8px;">
+                    <button id="view-cards-btn" class="segment-btn active" style="padding:4px 8px; font-size:0.7rem;" onclick="setMapMode('cards')">📱 Schede</button>
+                    <button id="view-map-btn" class="segment-btn" style="padding:4px 8px; font-size:0.7rem;" onclick="setMapMode('canvas')">🗺️ Mappa</button>
+                </div>
+            </div>
+
+            <!-- VIEW 1: Cards View per Fila (iPhone Optimized) -->
+            <div id="cards-view-container">
+
+                <!-- FILA C (Davanti) -->
+                <div class="row-section">
+                    <div class="row-header">
+                        <div class="row-title">
+                            <span>Fila C (Davanti / Cattedra)</span>
+                        </div>
+                        <span class="row-badge row-c-badge">⭐ Voti 3.0 &ndash; 6.5</span>
+                    </div>
+                    <div class="desk-grid" id="grid-row-c">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- FILA B (Centro) -->
+                <div class="row-section">
+                    <div class="row-header">
+                        <div class="row-title">
+                            <span>Fila B (Centro Aula)</span>
+                        </div>
+                        <span class="row-badge row-b-badge">⭐ Voti 5.0 &ndash; 9.0</span>
+                    </div>
+                    <div class="desk-grid" id="grid-row-b">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- FILA A (In Fondo) -->
+                <div class="row-section">
+                    <div class="row-header">
+                        <div class="row-title">
+                            <span>Fila A (In Fondo)</span>
+                        </div>
+                        <span class="row-badge row-a-badge">⭐ Voti 6.5 &ndash; 10.0</span>
+                    </div>
+                    <div class="desk-grid" id="grid-row-a">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- VIEW 2: Canvas Map View (Horizontal Scrollable) -->
+            <div id="canvas-view-container" style="display:none;" class="row-section">
+                <div class="blackboard-box">
+                    <span>🪟 LATO FINESTRE</span>
+                    <span class="teacher-box">👨‍🏫 Cattedra Professore</span>
+                    <span>🚪 LATO PORTA</span>
+                </div>
+
+                <div class="map-horizontal-scroll">
+                    <div class="canvas-grid">
+                        
+                        <!-- Row C -->
+                        <div class="canvas-row">
+                            <div class="canvas-row-label">Fila C<br><small>Davanti</small></div>
+                            <div class="canvas-block">
+                                <div id="seat-c1" class="desk-item" style="width:78px;" onclick="handleDeskTap('c1')"></div>
+                                <div id="seat-c2" class="desk-item" style="width:78px;" onclick="handleDeskTap('c2')"></div>
+                            </div>
+                            <div class="aisle">||</div>
+                            <div class="canvas-block">
+                                <div id="seat-c4" class="desk-item" style="width:78px;" onclick="handleDeskTap('c4')"></div>
+                                <div id="seat-c5" class="desk-item" style="width:78px;" onclick="handleDeskTap('c5')"></div>
+                            </div>
+                            <div class="aisle">||</div>
+                            <div class="canvas-block">
+                                <div id="seat-c6" class="desk-item" style="width:78px;" onclick="handleDeskTap('c6')"></div>
+                                <div id="seat-c7" class="desk-item" style="width:78px;" onclick="handleDeskTap('c7')"></div>
+                                <div id="seat-c8" class="desk-item" style="width:78px;" onclick="handleDeskTap('c8')"></div>
+                            </div>
+                        </div>
+
+                        <!-- Row B -->
+                        <div class="canvas-row">
+                            <div class="canvas-row-label">Fila B<br><small>Centro</small></div>
+                            <div class="canvas-block">
+                                <div id="seat-b1" class="desk-item" style="width:78px;" onclick="handleDeskTap('b1')"></div>
+                                <div id="seat-b2" class="desk-item" style="width:78px;" onclick="handleDeskTap('b2')"></div>
+                            </div>
+                            <div class="aisle">||</div>
+                            <div class="canvas-block">
+                                <div id="seat-b3" class="desk-item" style="width:78px;" onclick="handleDeskTap('b3')"></div>
+                                <div id="seat-b4" class="desk-item" style="width:78px;" onclick="handleDeskTap('b4')"></div>
+                                <div id="seat-b5" class="desk-item" style="width:78px;" onclick="handleDeskTap('b5')"></div>
+                            </div>
+                            <div class="aisle">||</div>
+                            <div class="canvas-block">
+                                <div id="seat-b6" class="desk-item" style="width:78px;" onclick="handleDeskTap('b6')"></div>
+                                <div id="seat-b7" class="desk-item" style="width:78px;" onclick="handleDeskTap('b7')"></div>
+                                <div id="seat-b8" class="desk-item" style="width:78px;" onclick="handleDeskTap('b8')"></div>
+                            </div>
+                        </div>
+
+                        <!-- Row A -->
+                        <div class="canvas-row">
+                            <div class="canvas-row-label">Fila A<br><small>Fondo</small></div>
+                            <div class="canvas-block">
+                                <div id="seat-a1" class="desk-item" style="width:78px;" onclick="handleDeskTap('a1')"></div>
+                                <div id="seat-a2" class="desk-item" style="width:78px;" onclick="handleDeskTap('a2')"></div>
+                            </div>
+                            <div class="aisle">||</div>
+                            <div class="canvas-block">
+                                <div id="seat-a3" class="desk-item" style="width:78px;" onclick="handleDeskTap('a3')"></div>
+                                <div id="seat-a4" class="desk-item" style="width:78px;" onclick="handleDeskTap('a4')"></div>
+                                <div id="seat-a5" class="desk-item" style="width:78px;" onclick="handleDeskTap('a5')"></div>
+                            </div>
+                            <div class="aisle">||</div>
+                            <div class="canvas-block">
+                                <div id="seat-a6" class="desk-item" style="width:78px;" onclick="handleDeskTap('a6')"></div>
+                                <div id="seat-a7" class="desk-item" style="width:78px;" onclick="handleDeskTap('a7')"></div>
+                                <div id="seat-a8" class="desk-item" style="width:78px;" onclick="handleDeskTap('a8')"></div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Footer Buttons -->
+            <div style="display:flex; gap:8px; margin-top:10px;">
+                <button class="btn-sheet-primary" style="flex:1;" onclick="openAdvanceRoundSheet()">
+                    💾 Archivia & Passa al Prossimo Turno
+                </button>
+            </div>
+
+        </div>
+
+        <!-- TAB 2: Studenti -->
+        <div id="tab-students" class="tab-content">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <span style="font-size:0.85rem; font-weight:800;">Elenco 23 Studenti</span>
+                <button class="btn-ios-small" onclick="openNamesModal()">+ Incolla Lista</button>
+            </div>
+            <div id="students-list-container">
+                <!-- Populated by JS -->
+            </div>
+        </div>
+
+        <!-- TAB 3: Voti Banchi -->
+        <div id="tab-scores" class="tab-content">
+            <div class="row-section">
+                <div class="sheet-title" style="font-size:1rem;">I Voti della Tua Aula (Foto)</div>
+                <div class="sheet-sub">Media perfetta calcolata: <strong>6.46</strong>. Tocca un banco se desideri modificare il suo voto.</div>
+                <div id="scores-grid-container" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(130px, 1fr)); gap:8px;">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Floating Interactive Swap Banner -->
+    <div id="floating-swap" class="swap-bar">
+        <div style="font-size:0.78rem;">
+            🔄 <strong><span id="swap-code-label">C4</span></strong> selezionato. Tocca un altro banco per scambiarli!
+        </div>
+        <button class="btn-ios-small" style="background:#fee2e2; color:#dc2626; border:none;" onclick="cancelSwapSelection()">Annulla</button>
+    </div>
+
+    <!-- iOS Bottom Tab Bar -->
+    <nav class="ios-tabbar">
+        <button class="tab-item active" onclick="switchNavTab('tab-seating', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+            Piantina
+        </button>
+
+        <button class="btn-calc-big" style="padding:8px 16px; font-size:0.78rem;" onclick="triggerOptimization()">
+            ⚡ Calcola
+        </button>
+
+        <button class="tab-item" onclick="switchNavTab('tab-students', event)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Studenti
+        </button>
+    </nav>
+
+    <!-- Modal Sheet: Istruzioni Installazione iPhone -->
+    <div id="modal-install" class="sheet-overlay">
+        <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Come Aggiungere l'App su iPhone 📱</div>
+            <div class="sheet-sub">In 3 semplici passaggi avrai l'icona viola <strong>EquiBanco</strong> sulla Home e si aprirà a schermo intero come una vera app:</div>
+            
+            <div class="step-item">
+                <div class="step-num">1</div>
+                <div class="step-text">Apri questa pagina nel browser <strong>Safari</strong> sul tuo iPhone.</div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">2</div>
+                <div class="step-text">Tocca il pulsante <strong>Condividi</strong> in basso al centro (il quadrato con la freccia verso l'alto 📤).</div>
+            </div>
+
+            <div class="step-item">
+                <div class="step-num">3</div>
+                <div class="step-text">Scorri verso il basso e tocca <strong>"Aggiungi alla schermata Home"</strong> (➕), poi tocca <strong>Aggiungi</strong> in alto a destra.</div>
+            </div>
+
+            <div style="background:#eef2ff; border-radius:10px; padding:10px; font-size:0.75rem; color:#3730a3; margin:10px 0;">
+                🎉 Fatto! Ora trovi l'app <strong>EquiBanco</strong> tra le tue app sulla Home dell'iPhone, funzionante a schermo intero e con memoria dei dati salvati!
+            </div>
+
+            <button class="btn-sheet-primary" onclick="closeSheet('modal-install')">Ho Capito!</button>
+        </div>
+    </div>
+
+    <!-- Modal Sheet: Incolla Nomi Classe -->
+    <div id="modal-names" class="sheet-overlay">
+        <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Incolla i Nomi della Classe</div>
+            <div class="sheet-sub">Incolla la lista dei 23 compagni (un nome per riga). Se qualcuno ha problemi di vista, scrivi <code>(vista)</code> accanto al nome.</div>
+            <textarea id="bulk-names-text" class="form-control" style="min-height:180px;" placeholder="Marco Bianchi&#10;Chiara Conti (vista)&#10;Davide Ferrari&#10;..."></textarea>
+            <button class="btn-sheet-primary" onclick="applyBulkNames()">Salva Elenco Nomi</button>
+            <button class="btn-sheet-secondary" onclick="closeSheet('modal-names')">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- Modal Sheet: Conferma Nuovo Turno -->
+    <div id="modal-round" class="sheet-overlay">
+        <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title" id="round-modal-title">Archivia Turno 3</div>
+            <div class="sheet-sub">Questo salverà i voti dei posti attuali nello storico di ciascuno studente e calcolerà la nuova disposizione per il prossimo turno.</div>
+            <button class="btn-sheet-primary" onclick="confirmAdvanceRound()">Sì, Passa al Prossimo Turno</button>
+            <button class="btn-sheet-secondary" onclick="closeSheet('modal-round')">Annulla</button>
+        </div>
+    </div>
+
+    <!-- Modal Sheet: Modifica Voto Banco -->
+    <div id="modal-edit-desk" class="sheet-overlay">
+        <div class="bottom-sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title" id="edit-desk-title">Modifica Voto Banco</div>
+            <input type="hidden" id="edit-desk-code">
+            <div class="sheet-sub">Imposta il voto da 1 a 10 per questo banco.</div>
+            <input type="number" id="edit-desk-score" class="form-control" step="0.5" min="1" max="10">
+            <button class="btn-sheet-primary" onclick="saveDeskVote()">Salva Voto</button>
+            <button class="btn-sheet-secondary" onclick="closeSheet('modal-edit-desk')">Annulla</button>
+        </div>
+    </div>
+
+    <script>
+        // Exact 23 Seats from photo
+        const DEFAULT_SEATS = [
+            { code: "c1", row: "c", score: 6.5, label: "Fila C - Sx (Finestra)" },
+            { code: "c2", row: "c", score: 4.0, label: "Fila C - Sx" },
+            { code: "c4", row: "c", score: 3.0, label: "Fila C - Centro" },
+            { code: "c5", row: "c", score: 3.0, label: "Fila C - Centro" },
+            { code: "c6", row: "c", score: 3.5, label: "Fila C - Dx" },
+            { code: "c7", row: "c", score: 4.0, label: "Fila C - Dx" },
+            { code: "c8", row: "c", score: 6.0, label: "Fila C - Dx (Porta)" },
+
+            { code: "b1", row: "b", score: 7.0, label: "Fila B - Sx (Finestra)" },
+            { code: "b2", row: "b", score: 5.5, label: "Fila B - Sx" },
+            { code: "b3", row: "b", score: 5.0, label: "Fila B - Centro" },
+            { code: "b4", row: "b", score: 5.0, label: "Fila B - Centro" },
+            { code: "b5", row: "b", score: 5.0, label: "Fila B - Centro" },
+            { code: "b6", row: "b", score: 5.0, label: "Fila B - Dx" },
+            { code: "b7", row: "b", score: 7.0, label: "Fila B - Dx" },
+            { code: "b8", row: "b", score: 9.0, label: "Fila B - Dx (Porta)" },
+
+            { code: "a1", row: "a", score: 10.0, label: "Fila A - Sx Angolo (10)" },
+            { code: "a2", row: "a", score: 6.5, label: "Fila A - Sx" },
+            { code: "a3", row: "a", score: 9.5, label: "Fila A - Centro (9.5)" },
+            { code: "a4", row: "a", score: 8.5, label: "Fila A - Centro (8.5)" },
+            { code: "a5", row: "a", score: 9.0, label: "Fila A - Centro (9)" },
+            { code: "a6", row: "a", score: 7.0, label: "Fila A - Dx (7)" },
+            { code: "a7", row: "a", score: 9.5, label: "Fila A - Dx (9.5)" },
+            { code: "a8", row: "a", score: 10.0, label: "Fila A - Dx Angolo (10)" }
+        ];
+
+        const DEFAULT_STUDENTS = [
+            { id: 1, name: "Alessio Moretti", frontOnly: false, history: [9.0, 9.5] },
+            { id: 2, name: "Beatrice Rossi", frontOnly: true, history: [3.5, 4.0] },
+            { id: 3, name: "Carlo Conti", frontOnly: false, history: [6.5, 6.0] },
+            { id: 4, name: "Davide Ferrari", frontOnly: false, history: [10.0, 9.5] },
+            { id: 5, name: "Elena Gialli", frontOnly: false, history: [3.0, 3.5] },
+            { id: 6, name: "Federico Russo", frontOnly: false, history: [5.0, 5.5] },
+            { id: 7, name: "Giorgia Bianchi", frontOnly: false, history: [7.5, 8.0] },
+            { id: 8, name: "Iacopo Costa", frontOnly: true, history: [4.0, 3.0] },
+            { id: 9, name: "Laura De Luca", frontOnly: false, history: [10.0, 9.0] },
+            { id: 10, name: "Matteo Martini", frontOnly: false, history: [4.0, 4.5] },
+            { id: 11, name: "Nicole Galli", frontOnly: false, history: [6.0, 6.5] },
+            { id: 12, name: "Paolo Romano", frontOnly: false, history: [5.5, 5.0] },
+            { id: 13, name: "Quirino Ricci", frontOnly: false, history: [8.5, 9.0] },
+            { id: 14, name: "Sara Barbieri", frontOnly: false, history: [3.0, 3.0] },
+            { id: 15, name: "Tommaso Fontana", frontOnly: false, history: [7.0, 6.5] },
+            { id: 16, name: "Valentina Greco", frontOnly: false, history: [9.0, 8.5] },
+            { id: 17, name: "Valerio Marini", frontOnly: false, history: [5.0, 5.0] },
+            { id: 18, name: "Zeno Colombo", frontOnly: false, history: [5.0, 5.5] },
+            { id: 19, name: "Alice Esposito", frontOnly: false, history: [8.0, 7.5] },
+            { id: 20, name: "Bruno Serra", frontOnly: false, history: [4.5, 3.5] },
+            { id: 21, name: "Camilla Rinaldi", frontOnly: false, history: [9.5, 9.0] },
+            { id: 22, name: "Daniele Villa", frontOnly: false, history: [3.5, 4.0] },
+            { id: 23, name: "Elisa Carbone", frontOnly: false, history: [6.5, 7.0] }
+        ];
+
+        // Global State
+        let AppState = {
+            currentRound: 3,
+            seats: JSON.parse(JSON.stringify(DEFAULT_SEATS)),
+            students: JSON.parse(JSON.stringify(DEFAULT_STUDENTS)),
+            assignment: {}, // stId -> seatCode
+            selectedSeatForSwap: null,
+            mapMode: 'cards'
+        };
+
+        // Toast Helper
+        function showToast(msg, icon = '✨') {
+            const el = document.getElementById('toast');
+            document.getElementById('toast-msg').textContent = msg;
+            document.getElementById('toast-icon').textContent = icon;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 2200);
+        }
+
+        function getStudentMean(student) {
+            if (!student.history || student.history.length === 0) return getClassAverage();
+            return student.history.reduce((a, b) => a + b, 0) / student.history.length;
+        }
+
+        function getClassAverage() {
+            return AppState.seats.reduce((a, b) => a + b.score, 0) / AppState.seats.length;
+        }
+
+        // Hungarian Algorithm
+        function hungarianAlgorithm(matrix) {
+            const n = matrix.length;
+            const m = matrix[0].length;
+            const dim = Math.max(n, m);
+            
+            const cost = Array.from({ length: dim }, (_, i) => 
+                Array.from({ length: dim }, (_, j) => (i < n && j < m) ? matrix[i][j] : 1e9)
+            );
+            
+            const u = new Array(dim + 1).fill(0);
+            const v = new Array(dim + 1).fill(0);
+            const p = new Array(dim + 1).fill(0);
+            const way = new Array(dim + 1).fill(0);
+            
+            for (let i = 1; i <= dim; i++) {
+                p[0] = i;
+                let j0 = 0;
+                const minv = new Array(dim + 1).fill(Infinity);
+                const used = new Array(dim + 1).fill(false);
+                
+                do {
+                    used[j0] = true;
+                    const i0 = p[j0];
+                    let delta = Infinity;
+                    let j1 = 0;
+                    
+                    for (let j = 1; j <= dim; j++) {
+                        if (!used[j]) {
+                            const cur = cost[i0 - 1][j - 1] - u[i0] - v[j];
+                            if (cur < minv[j]) {
+                                minv[j] = cur;
+                                way[j] = j0;
+                            }
+                            if (minv[j] < delta) {
+                                delta = minv[j];
+                                j1 = j;
+                            }
+                        }
+                    }
+                    
+                    for (let j = 0; j <= dim; j++) {
+                        if (used[j]) {
+                            u[p[j]] += delta;
+                            v[j] -= delta;
+                        } else {
+                            minv[j] -= delta;
+                        }
+                    }
+                    j0 = j1;
+                } while (p[j0] !== 0);
+                
+                do {
+                    const j1 = way[j0];
+                    p[j0] = p[j1];
+                    j0 = j1;
+                } while (j0 !== 0);
+            }
+            
+            const assignment = new Array(n);
+            for (let j = 1; j <= dim; j++) {
+                if (p[j] <= n && (j - 1) < m) {
+                    assignment[p[j] - 1] = j - 1;
+                }
+            }
+            return assignment;
+        }
+
+        function calculateOptimalMatching() {
+            const targetMean = getClassAverage();
+            const t = AppState.currentRound;
+
+            const costMatrix = [];
+            for (let i = 0; i < AppState.students.length; i++) {
+                const st = AppState.students[i];
+                const histMean = getStudentMean(st);
+                const histLen = (st.history && st.history.length > 0) ? st.history.length : (t - 1);
+
+                const rowCosts = [];
+                for (let j = 0; j < AppState.seats.length; j++) {
+                    const seat = AppState.seats[j];
+                    const newMean = (histMean * histLen + seat.score) / (histLen + 1);
+
+                    let cost = Math.pow(newMean - targetMean, 2) * 100;
+
+                    if (st.frontOnly && seat.row === 'a') {
+                        cost += 50000;
+                    }
+                    rowCosts.push(cost);
+                }
+                costMatrix.push(rowCosts);
+            }
+
+            const rawAssign = hungarianAlgorithm(costMatrix);
+            AppState.assignment = {};
+            for (let i = 0; i < AppState.students.length; i++) {
+                const sIdx = rawAssign[i];
+                if (sIdx !== undefined && sIdx < AppState.seats.length) {
+                    AppState.assignment[AppState.students[i].id] = AppState.seats[sIdx].code;
+                }
+            }
+        }
+
+        function triggerOptimization() {
+            calculateOptimalMatching();
+            renderAllApp();
+            showToast("Disposizione Equa Calcolata!", "⚡");
+        }
+
+        function getScoreClass(score) {
+            if (score >= 10.0) return "sc-10";
+            if (score >= 8.5) return "sc-top";
+            if (score >= 6.5) return "sc-high";
+            if (score >= 5.0) return "sc-mid";
+            return "sc-low";
+        }
+
+        // Render everything
+        function renderAllApp() {
+            renderStatsWidget();
+            renderCardView();
+            renderCanvasView();
+            renderStudentsTab();
+            renderScoresTab();
+        }
+
+        function renderStatsWidget() {
+            const avg = getClassAverage();
+            document.getElementById('stat-students').textContent = AppState.students.length;
+            document.getElementById('stat-mean').textContent = avg.toFixed(2);
+            document.getElementById('stat-round').textContent = `Turno ${AppState.currentRound}`;
+
+            if (AppState.students.length > 0) {
+                const projected = AppState.students.map(st => {
+                    const code = AppState.assignment[st.id];
+                    const s = AppState.seats.find(x => x.code === code);
+                    const sScore = s ? s.score : avg;
+                    const hist = st.history || [];
+                    return (hist.reduce((a, b) => a + b, 0) + sScore) / (hist.length + 1);
+                });
+                const meanOfMeans = projected.reduce((a, b) => a + b, 0) / projected.length;
+                const variance = projected.reduce((a, b) => a + Math.pow(b - meanOfMeans, 2), 0) / projected.length;
+                const stdDev = Math.sqrt(variance);
+                const fairness = Math.max(0, Math.min(100, (1 - stdDev / 4.0) * 100));
+                document.getElementById('stat-fairness').textContent = fairness.toFixed(1) + '%';
+            }
+        }
+
+        function renderCardView() {
+            const classAvg = getClassAverage();
+            const rowIds = { 'c': 'grid-row-c', 'b': 'grid-row-b', 'a': 'grid-row-a' };
+
+            Object.keys(rowIds).forEach(r => {
+                const container = document.getElementById(rowIds[r]);
+                if (!container) return;
+                container.innerHTML = '';
+
+                const rowSeats = AppState.seats.filter(s => s.row === r);
+                rowSeats.forEach(seat => {
+                    const stId = Object.keys(AppState.assignment).find(id => AppState.assignment[id] === seat.code);
+                    const student = stId ? AppState.students.find(s => s.id == stId) : null;
+                    const isSelected = AppState.selectedSeatForSwap === seat.code;
+
+                    let newMean = 0, diff = 0;
+                    if (student) {
+                        const histMean = getStudentMean(student);
+                        const count = (student.history && student.history.length > 0) ? student.history.length : (AppState.currentRound - 1);
+                        newMean = (histMean * count + seat.score) / (count + 1);
+                        diff = newMean - classAvg;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `desk-item ${isSelected ? 'selected-swap' : ''}`;
+                    card.onclick = () => handleDeskTap(seat.code);
+
+                    card.innerHTML = `
+                        <div class="desk-top">
+                            <span class="desk-code">${seat.code.toUpperCase()}</span>
+                            <span class="score-pill ${getScoreClass(seat.score)}">⭐ ${seat.score.toFixed(1)}</span>
+                        </div>
+                        <div class="desk-student">${student ? student.name : '<em style="color:#94a3b8">Libero</em>'}</div>
+                        ${student && student.frontOnly ? '<div><span class="tag-front">👓 Vista</span></div>' : ''}
+                        <div class="desk-bot">
+                            <span>M: <strong class="m-val">${newMean.toFixed(1)}</strong></span>
+                            <span class="diff-tag ${diff > 0.1 ? 'diff-p' : (diff < -0.1 ? 'diff-n' : 'diff-z')}">
+                                ${diff > 0 ? '+' : ''}${diff.toFixed(1)}
+                            </span>
+                        </div>
+                    `;
+                    container.appendChild(card);
+                });
+            });
+        }
+
+        function renderCanvasView() {
+            const classAvg = getClassAverage();
+            AppState.seats.forEach(seat => {
+                const el = document.getElementById(`seat-${seat.code}`);
+                if (!el) return;
+
+                const stId = Object.keys(AppState.assignment).find(id => AppState.assignment[id] === seat.code);
+                const student = stId ? AppState.students.find(s => s.id == stId) : null;
+                const isSelected = AppState.selectedSeatForSwap === seat.code;
+
+                if (isSelected) el.classList.add('selected-swap');
+                else el.classList.remove('selected-swap');
+
+                let newMean = 0, diff = 0;
+                if (student) {
+                    const histMean = getStudentMean(student);
+                    const count = (student.history && student.history.length > 0) ? student.history.length : (AppState.currentRound - 1);
+                    newMean = (histMean * count + seat.score) / (count + 1);
+                    diff = newMean - classAvg;
+                }
+
+                el.innerHTML = `
+                    <div class="desk-top">
+                        <span class="desk-code">${seat.code.toUpperCase()}</span>
+                        <span class="score-pill ${getScoreClass(seat.score)}">⭐${seat.score.toFixed(1)}</span>
+                    </div>
+                    <div class="desk-student">${student ? student.name : '<em style="color:#94a3b8">Libero</em>'}</div>
+                    ${student && student.frontOnly ? '<div><span class="tag-front">👓 Vista</span></div>' : ''}
+                    <div class="desk-bot">
+                        <span>${newMean.toFixed(1)}</span>
+                        <span class="diff-tag ${diff > 0.1 ? 'diff-p' : (diff < -0.1 ? 'diff-n' : 'diff-z')}">
+                            ${diff > 0 ? '+' : ''}${diff.toFixed(1)}
+                        </span>
+                    </div>
+                `;
+            });
+        }
+
+        function renderStudentsTab() {
+            const container = document.getElementById('students-list-container');
+            if (!container) return;
+            container.innerHTML = '';
+            const classAvg = getClassAverage();
+
+            const sorted = [...AppState.students].sort((a, b) => a.name.localeCompare(b.name));
+            sorted.forEach(st => {
+                const sCode = AppState.assignment[st.id];
+                const seat = AppState.seats.find(s => s.code === sCode);
+                const histMean = getStudentMean(st);
+                const histCount = (st.history && st.history.length > 0) ? st.history.length : (AppState.currentRound - 1);
+
+                let newMean = histMean;
+                let diff = 0;
+                if (seat) {
+                    newMean = (histMean * histCount + seat.score) / (histCount + 1);
+                    diff = newMean - classAvg;
+                }
+
+                const card = document.createElement('div');
+                card.className = 'student-card';
+                card.innerHTML = `
+                    <div>
+                        <div class="student-card-name">${st.name} ${st.frontOnly ? '<span class="tag-front">👓 Vista</span>' : ''}</div>
+                        <div class="student-card-sub">
+                            <span>Banco:</span>
+                            <span class="seat-badge">${seat ? seat.code.toUpperCase() + ' (⭐' + seat.score.toFixed(1) + ')' : 'Non assegnato'}</span>
+                        </div>
+                    </div>
+                    <div class="student-stat">
+                        <div class="student-stat-val">${newMean.toFixed(2)}</div>
+                        <div class="student-stat-diff ${diff > 0.1 ? 'diff-p' : (diff < -0.1 ? 'diff-n' : 'diff-z')}" style="padding:1px 4px; border-radius:3px; display:inline-block;">
+                            ${diff > 0 ? '+' : ''}${diff.toFixed(2)} vs aula
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderScoresTab() {
+            const container = document.getElementById('scores-grid-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            AppState.seats.forEach(s => {
+                const el = document.createElement('div');
+                el.style.cssText = "background:#f8fafc; border:1.5px solid #e2e8f0; border-radius:10px; padding:10px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;";
+                el.onclick = () => openEditDeskModal(s.code);
+                el.innerHTML = `
+                    <div>
+                        <strong style="font-size:0.85rem; color:#0f172a;">${s.code.toUpperCase()}</strong>
+                        <div style="font-size:0.68rem; color:#64748b;">${s.label}</div>
+                    </div>
+                    <span class="score-pill ${getScoreClass(s.score)}">⭐ ${s.score.toFixed(1)}</span>
+                `;
+                container.appendChild(el);
+            });
+        }
+
+        // Tap Desk logic
+        function handleDeskTap(code) {
+            if (AppState.selectedSeatForSwap === null) {
+                AppState.selectedSeatForSwap = code;
+                document.getElementById('swap-code-label').textContent = code.toUpperCase();
+                document.getElementById('floating-swap').classList.add('active');
+                renderAllApp();
+            } else if (AppState.selectedSeatForSwap === code) {
+                cancelSwapSelection();
+            } else {
+                const code1 = AppState.selectedSeatForSwap;
+                const code2 = code;
+
+                const st1Id = Object.keys(AppState.assignment).find(id => AppState.assignment[id] === code1);
+                const st2Id = Object.keys(AppState.assignment).find(id => AppState.assignment[id] === code2);
+
+                if (st1Id && st2Id) {
+                    AppState.assignment[st1Id] = code2;
+                    AppState.assignment[st2Id] = code1;
+                } else if (st1Id) {
+                    AppState.assignment[st1Id] = code2;
+                } else if (st2Id) {
+                    AppState.assignment[st2Id] = code1;
+                }
+
+                cancelSwapSelection();
+                renderAllApp();
+                showToast(`Scambiati ${code1.toUpperCase()} e ${code2.toUpperCase()}!`, "🔄");
+            }
+        }
+
+        function cancelSwapSelection() {
+            AppState.selectedSeatForSwap = null;
+            document.getElementById('floating-swap').classList.remove('active');
+            renderAllApp();
+        }
+
+        function setMapMode(mode) {
+            AppState.mapMode = mode;
+            if (mode === 'cards') {
+                document.getElementById('cards-view-container').style.display = 'block';
+                document.getElementById('canvas-view-container').style.display = 'none';
+                document.getElementById('view-cards-btn').classList.add('active');
+                document.getElementById('view-map-btn').classList.remove('active');
+            } else {
+                document.getElementById('cards-view-container').style.display = 'none';
+                document.getElementById('canvas-view-container').style.display = 'block';
+                document.getElementById('view-cards-btn').classList.remove('active');
+                document.getElementById('view-map-btn').classList.add('active');
+            }
+        }
+
+        function switchNavTab(tabId, ev) {
+            document.querySelectorAll('.segment-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.tab-item').forEach(b => b.classList.remove('active'));
+
+            if (ev && ev.currentTarget) {
+                ev.currentTarget.classList.add('active');
+            }
+            document.getElementById(tabId).classList.add('active');
+        }
+
+        // Modals Sheet Handlers
+        function openInstallSheet() {
+            document.getElementById('modal-install').classList.add('active');
+        }
+
+        function openNamesModal() {
+            document.getElementById('bulk-names-text').value = AppState.students.map(s => s.name + (s.frontOnly ? ' (vista)' : '')).join('\n');
+            document.getElementById('modal-names').classList.add('active');
+        }
+
+        function applyBulkNames() {
+            const lines = document.getElementById('bulk-names-text').value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length === 0) return;
+
+            const newStudents = [];
+            let id = 1;
+            lines.forEach(line => {
+                const frontOnly = line.toLowerCase().includes('(vista)') || line.toLowerCase().includes('(davanti)') || line.toLowerCase().includes('(occhiali)');
+                const cleanName = line.replace(/\((.*?)\)/g, '').trim();
+                newStudents.push({
+                    id: id++,
+                    name: cleanName,
+                    frontOnly: frontOnly,
+                    history: []
+                });
+            });
+
+            AppState.students = newStudents;
+            closeSheet('modal-names');
+            triggerOptimization();
+            showToast("Nomi classe aggiornati!", "✅");
+        }
+
+        function openAdvanceRoundSheet() {
+            document.getElementById('round-modal-title').textContent = `Archivia Turno ${AppState.currentRound}`;
+            document.getElementById('modal-round').classList.add('active');
+        }
+
+        function confirmAdvanceRound() {
+            AppState.students.forEach(st => {
+                const code = AppState.assignment[st.id];
+                const s = AppState.seats.find(x => x.code === code);
+                if (s) {
+                    if (!st.history) st.history = [];
+                    st.history.push(s.score);
+                }
+            });
+
+            AppState.currentRound += 1;
+            closeSheet('modal-round');
+            triggerOptimization();
+            showToast(`Turno ${AppState.currentRound} avviato!`, "🚀");
+        }
+
+        function openEditDeskModal(code) {
+            const seat = AppState.seats.find(s => s.code === code);
+            if (!seat) return;
+            document.getElementById('edit-desk-title').textContent = `Voto Banco ${seat.code.toUpperCase()}`;
+            document.getElementById('edit-desk-code').value = seat.code;
+            document.getElementById('edit-desk-score').value = seat.score;
+            document.getElementById('modal-edit-desk').classList.add('active');
+        }
+
+        function saveDeskVote() {
+            const code = document.getElementById('edit-desk-code').value;
+            const score = parseFloat(document.getElementById('edit-desk-score').value);
+            const seat = AppState.seats.find(s => s.code === code);
+            if (seat && !isNaN(score)) {
+                seat.score = Math.min(10, Math.max(1, score));
+                closeSheet('modal-edit-desk');
+                triggerOptimization();
+                showToast(`Voto banco ${code.toUpperCase()} salvato!`, "⭐");
+            }
+        }
+
+        function closeSheet(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // WhatsApp Export
+        function copyWhatsAppSummary() {
+            let text = `🏫 *DISPOSIZIONE BANCHI - TURNO ${AppState.currentRound}*\n`;
+            text += `_Media aula: ${getClassAverage().toFixed(2)}_\n\n`;
+
+            text += `*🔴 FILA C (Davanti):*\n`;
+            AppState.seats.filter(s => s.row === 'c').forEach(s => {
+                const stId = Object.keys(AppState.assignment).find(id => AppState.assignment[id] === s.code);
+                const st = stId ? AppState.students.find(x => x.id == stId) : null;
+                text += `• ${s.code.toUpperCase()} (⭐${s.score}): ${st ? st.name : 'Libero'}\n`;
+            });
+
+            text += `\n*🟡 FILA B (Centro):*\n`;
+            AppState.seats.filter(s => s.row === 'b').forEach(s => {
+                const stId = Object.keys(AppState.assignment).find(id => AppState.assignment[id] === s.code);
+                const st = stId ? AppState.students.find(x => x.id == stId) : null;
+                text += `• ${s.code.toUpperCase()} (⭐${s.score}): ${st ? st.name : 'Libero'}\n`;
+            });
+
+            text += `\n*🟢 FILA A (In Fondo):*\n`;
+            AppState.seats.filter(s => s.row === 'a').forEach(s => {
+                const stId = Object.keys(AppState.assignment).find(id => AppState.assignment[id] === s.code);
+                const st = stId ? AppState.students.find(x => x.id == stId) : null;
+                text += `• ${s.code.toUpperCase()} (⭐${s.score}): ${st ? st.name : 'Libero'}\n`;
+            });
+
+            navigator.clipboard.writeText(text).then(() => {
+                showToast("Testo copiato per WhatsApp!", "📋");
+            }).catch(() => {
+                showToast("Testo generato!", "📋");
+            });
+        }
+
+        // Run immediately synchronously
+        calculateOptimalMatching();
+        renderAllApp();
+    </script>
+</body>
+</html>
