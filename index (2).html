@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Banchi">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    
+    <title>Disposizione Banchi</title>
+    <style>
+        :root {
+            --bg: #f2f2f7;
+            --card: #ffffff;
+            --card-sub: #f9f9fb;
+            --blue: #007aff;
+            --blue-active: #0056b3;
+            --green: #34c759;
+            --orange: #ff9500;
+            --red: #ff3b30;
+            --text: #000000;
+            --subtext: #8e8e93;
+            --border: #e5e5ea;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: calc(env(safe-area-inset-top, 0px) + 12px) 16px calc(env(safe-area-inset-bottom, 20px) + 20px);
+            min-height: 100vh;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* Top Bar */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+        }
+
+        .actions {
+            display: flex;
+            gap: 6px;
+        }
+
+        .btn {
+            background: var(--blue);
+            color: white;
+            border: none;
+            padding: 7px 13px;
+            border-radius: 18px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .btn:active {
+            opacity: 0.8;
+            transform: scale(0.96);
+        }
+
+        .btn-gray {
+            background: #e5e5ea;
+            color: #000;
+        }
+
+        .btn-green {
+            background: var(--green);
+        }
+
+        /* Stats Bar */
+        .stats-bar {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 10px 14px;
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--subtext);
+        }
+
+        .stats-bar span strong {
+            color: var(--text);
+            font-weight: 800;
+        }
+
+        /* Seating Rows */
+        .row-card {
+            background: var(--card);
+            border-radius: 14px;
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
+
+        .row-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .row-name {
+            font-size: 0.85rem;
+            font-weight: 700;
+        }
+
+        .row-score-badge {
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 10px;
+        }
+
+        .c-badge { background: #fee2e2; color: #b91c1c; }
+        .b-badge { background: #fef3c7; color: #b45309; }
+        .a-badge { background: #dcfce7; color: #15803d; }
+
+        .desk-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+        }
+
+        /* Desk Item */
+        .desk-item {
+            background: var(--card-sub);
+            border-radius: 10px;
+            padding: 7px;
+            border: 1.5px solid transparent;
+            cursor: pointer;
+            min-height: 78px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05);
+            transition: transform 0.1s;
+        }
+
+        .desk-item:active {
+            transform: scale(0.96);
+        }
+
+        .desk-item.selected {
+            border-color: var(--orange) !important;
+            background: #fffbeb !important;
+            box-shadow: 0 0 0 3px rgba(255, 149, 0, 0.3);
+        }
+
+        .desk-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .desk-code {
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+
+        .desk-score {
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 1px 4px;
+            border-radius: 4px;
+        }
+
+        .sc-10 { background: #bbf7d0; color: #14532d; font-weight: 900; }
+        .sc-9 { background: #dcfce7; color: #166534; font-weight: 800; }
+        .sc-7 { background: #e0f2fe; color: #0369a1; }
+        .sc-5 { background: #fef3c7; color: #b45309; }
+        .sc-3 { background: #fee2e2; color: #b91c1c; }
+
+        .desk-name {
+            font-size: 0.78rem;
+            font-weight: 700;
+            margin: 3px 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .desk-bot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.62rem;
+            color: var(--subtext);
+            border-top: 1px dashed rgba(0,0,0,0.08);
+            padding-top: 2px;
+        }
+
+        .diff {
+            font-weight: 800;
+            padding: 0 2px;
+            border-radius: 2px;
+        }
+
+        .diff-pos { color: var(--green); }
+        .diff-neg { color: var(--red); }
+        .diff-zero { color: var(--subtext); }
+
+        /* Floating Swap Alert */
+        .swap-bar {
+            position: fixed;
+            bottom: calc(env(safe-area-inset-bottom, 20px) + 12px);
+            left: 16px;
+            right: 16px;
+            background: #1c1c1e;
+            color: white;
+            padding: 12px 14px;
+            border-radius: 14px;
+            display: none;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            z-index: 50;
+        }
+
+        .swap-bar.active {
+            display: flex;
+        }
+
+        /* Modal Sheet */
+        .sheet-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            display: none;
+            align-items: flex-end;
+            z-index: 60;
+        }
+
+        .sheet-overlay.active {
+            display: flex;
+        }
+
+        .sheet {
+            background: var(--card);
+            width: 100%;
+            border-radius: 18px 18px 0 0;
+            padding: 16px 16px calc(env(safe-area-inset-bottom, 20px) + 16px);
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .sheet-handle {
+            width: 34px;
+            height: 4px;
+            background: #d1d1d6;
+            border-radius: 2px;
+            margin: 0 auto 12px;
+        }
+
+        .sheet-title {
+            font-size: 1.1rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        textarea {
+            width: 100%;
+            height: 180px;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            font-size: 0.9rem;
+            background: var(--bg);
+            margin-bottom: 12px;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: var(--blue);
+            background: white;
+        }
+
+        .toast {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            background: #1c1c1e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.2s;
+            z-index: 100;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="toast" class="toast">Notifica</div>
+
+    <!-- Header -->
+    <div class="header">
+        <h1 class="title">Banchi</h1>
+        <div class="actions">
+            <button class="btn btn-gray" onclick="openNames()">Nomi</button>
+            <button class="btn btn-gray" onclick="copyWhatsApp()">WhatsApp</button>
+            <button class="btn" onclick="calcola()">⚡ Calcola</button>
+        </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-bar">
+        <span>Studenti: <strong id="st-count">23</strong></span>
+        <span>Media Aula: <strong>6.46</strong></span>
+        <span>Turno: <strong id="st-round">3</strong></span>
+        <span>Equità: <strong id="st-fairness" style="color:var(--green)">98.5%</strong></span>
+    </div>
+
+    <!-- Rows from handwritten photo -->
+    <!-- FILA C -->
+    <div class="row-card">
+        <div class="row-header">
+            <span class="row-name">Fila C (Davanti)</span>
+            <span class="row-score-badge c-badge">Voti 3.0 &ndash; 6.5</span>
+        </div>
+        <div class="desk-grid" id="grid-c"></div>
+    </div>
+
+    <!-- FILA B -->
+    <div class="row-card">
+        <div class="row-header">
+            <span class="row-name">Fila B (Centro)</span>
+            <span class="row-score-badge b-badge">Voti 5.0 &ndash; 9.0</span>
+        </div>
+        <div class="desk-grid" id="grid-b"></div>
+    </div>
+
+    <!-- FILA A -->
+    <div class="row-card">
+        <div class="row-header">
+            <span class="row-name">Fila A (Fondo)</span>
+            <span class="row-score-badge a-badge">Voti 6.5 &ndash; 10.0</span>
+        </div>
+        <div class="desk-grid" id="grid-a"></div>
+    </div>
+
+    <!-- Save / Next Round button -->
+    <button class="btn btn-green" style="width:100%; padding:12px; border-radius:12px; font-size:0.9rem; justify-content:center;" onclick="nextRound()">
+        💾 Salva Turno e Avanza
+    </button>
+
+    <!-- Floating Swap Banner -->
+    <div id="swap-banner" class="swap-bar">
+        <span style="font-size:0.8rem;">Banco <strong><span id="swap-code">C4</span></strong> selezionato. Tocca un altro banco per scambiarli.</span>
+        <button class="btn btn-gray" style="padding:4px 8px; font-size:0.75rem;" onclick="cancelSwap()">Annulla</button>
+    </div>
+
+    <!-- Names Modal Sheet -->
+    <div id="sheet-names" class="sheet-overlay">
+        <div class="sheet">
+            <div class="sheet-handle"></div>
+            <div class="sheet-title">Nomi Classe (23)</div>
+            <p style="font-size:0.75rem; color:var(--subtext); margin-bottom:10px;">Un nome per riga. Aggiungi <code>(vista)</code> se deve stare davanti.</p>
+            <textarea id="names-input"></textarea>
+            <button class="btn" style="width:100%; padding:12px; border-radius:10px; justify-content:center;" onclick="saveNames()">Salva Nomi</button>
+            <button class="btn btn-gray" style="width:100%; padding:10px; border-radius:10px; justify-content:center; margin-top:6px;" onclick="closeNames()">Chiudi</button>
+        </div>
+    </div>
+
+    <script>
+        // Exact seats from your handwritten sheet
+        const SEATS = [
+            // Row C
+            { code: "c1", row: "c", score: 6.5 },
+            { code: "c2", row: "c", score: 4.0 },
+            { code: "c4", row: "c", score: 3.0 },
+            { code: "c5", row: "c", score: 3.0 },
+            { code: "c6", row: "c", score: 3.5 },
+            { code: "c7", row: "c", score: 4.0 },
+            { code: "c8", row: "c", score: 6.0 },
+
+            // Row B
+            { code: "b1", row: "b", score: 7.0 },
+            { code: "b2", row: "b", score: 5.5 },
+            { code: "b3", row: "b", score: 5.0 },
+            { code: "b4", row: "b", score: 5.0 },
+            { code: "b5", row: "b", score: 5.0 },
+            { code: "b6", row: "b", score: 5.0 },
+            { code: "b7", row: "b", score: 7.0 },
+            { code: "b8", row: "b", score: 9.0 },
+
+            // Row A
+            { code: "a1", row: "a", score: 10.0 },
+            { code: "a2", row: "a", score: 6.5 },
+            { code: "a3", row: "a", score: 9.5 },
+            { code: "a4", row: "a", score: 8.5 },
+            { code: "a5", row: "a", score: 9.0 },
+            { code: "a6", row: "a", score: 7.0 },
+            { code: "a7", row: "a", score: 9.5 },
+            { code: "a8", row: "a", score: 10.0 }
+        ];
+
+        const DEFAULT_STUDENTS = [
+            { id: 1, name: "Alessio Moretti", front: false, history: [9.0, 9.5] },
+            { id: 2, name: "Beatrice Rossi", front: true, history: [3.5, 4.0] },
+            { id: 3, name: "Carlo Conti", front: false, history: [6.5, 6.0] },
+            { id: 4, name: "Davide Ferrari", front: false, history: [10.0, 9.5] },
+            { id: 5, name: "Elena Gialli", front: false, history: [3.0, 3.5] },
+            { id: 6, name: "Federico Russo", front: false, history: [5.0, 5.5] },
+            { id: 7, name: "Giorgia Bianchi", front: false, history: [7.5, 8.0] },
+            { id: 8, name: "Iacopo Costa", front: true, history: [4.0, 3.0] },
+            { id: 9, name: "Laura De Luca", front: false, history: [10.0, 9.0] },
+            { id: 10, name: "Matteo Martini", front: false, history: [4.0, 4.5] },
+            { id: 11, name: "Nicole Galli", front: false, history: [6.0, 6.5] },
+            { id: 12, name: "Paolo Romano", front: false, history: [5.5, 5.0] },
+            { id: 13, name: "Quirino Ricci", front: false, history: [8.5, 9.0] },
+            { id: 14, name: "Sara Barbieri", front: false, history: [3.0, 3.0] },
+            { id: 15, name: "Tommaso Fontana", front: false, history: [7.0, 6.5] },
+            { id: 16, name: "Valentina Greco", front: false, history: [9.0, 8.5] },
+            { id: 17, name: "Valerio Marini", front: false, history: [5.0, 5.0] },
+            { id: 18, name: "Zeno Colombo", front: false, history: [5.0, 5.5] },
+            { id: 19, name: "Alice Esposito", front: false, history: [8.0, 7.5] },
+            { id: 20, name: "Bruno Serra", front: false, history: [4.5, 3.5] },
+            { id: 21, name: "Camilla Rinaldi", front: false, history: [9.5, 9.0] },
+            { id: 22, name: "Daniele Villa", front: false, history: [3.5, 4.0] },
+            { id: 23, name: "Elisa Carbone", front: false, history: [6.5, 7.0] }
+        ];
+
+        let state = {
+            round: 3,
+            students: JSON.parse(JSON.stringify(DEFAULT_STUDENTS)),
+            assign: {}, // stId -> seatCode
+            selected: null
+        };
+
+        const CLASS_AVG = 6.46;
+
+        function showToast(msg) {
+            const el = document.getElementById('toast');
+            el.textContent = msg;
+            el.classList.add('show');
+            setTimeout(() => el.classList.remove('show'), 1800);
+        }
+
+        function getMean(st) {
+            if (!st.history || st.history.length === 0) return CLASS_AVG;
+            return st.history.reduce((a, b) => a + b, 0) / st.history.length;
+        }
+
+        // Kuhn-Munkres Hungarian Algorithm
+        function hungarian(matrix) {
+            const n = matrix.length;
+            const m = matrix[0].length;
+            const dim = Math.max(n, m);
+            
+            const cost = Array.from({ length: dim }, (_, i) => 
+                Array.from({ length: dim }, (_, j) => (i < n && j < m) ? matrix[i][j] : 1e9)
+            );
+            
+            const u = new Array(dim + 1).fill(0);
+            const v = new Array(dim + 1).fill(0);
+            const p = new Array(dim + 1).fill(0);
+            const way = new Array(dim + 1).fill(0);
+            
+            for (let i = 1; i <= dim; i++) {
+                p[0] = i;
+                let j0 = 0;
+                const minv = new Array(dim + 1).fill(Infinity);
+                const used = new Array(dim + 1).fill(false);
+                
+                do {
+                    used[j0] = true;
+                    const i0 = p[j0];
+                    let delta = Infinity;
+                    let j1 = 0;
+                    
+                    for (let j = 1; j <= dim; j++) {
+                        if (!used[j]) {
+                            const cur = cost[i0 - 1][j - 1] - u[i0] - v[j];
+                            if (cur < minv[j]) {
+                                minv[j] = cur;
+                                way[j] = j0;
+                            }
+                            if (minv[j] < delta) {
+                                delta = minv[j];
+                                j1 = j;
+                            }
+                        }
+                    }
+                    
+                    for (let j = 0; j <= dim; j++) {
+                        if (used[j]) {
+                            u[p[j]] += delta;
+                            v[j] -= delta;
+                        } else {
+                            minv[j] -= delta;
+                        }
+                    }
+                    j0 = j1;
+                } while (p[j0] !== 0);
+                
+                do {
+                    const j1 = way[j0];
+                    p[j0] = p[j1];
+                    j0 = j1;
+                } while (j0 !== 0);
+            }
+            
+            const res = new Array(n);
+            for (let j = 1; j <= dim; j++) {
+                if (p[j] <= n && (j - 1) < m) {
+                    res[p[j] - 1] = j - 1;
+                }
+            }
+            return res;
+        }
+
+        function solve() {
+            const costMatrix = [];
+            for (let i = 0; i < state.students.length; i++) {
+                const st = state.students[i];
+                const histMean = getMean(st);
+                const len = st.history ? st.history.length : (state.round - 1);
+
+                const row = [];
+                for (let j = 0; j < SEATS.length; j++) {
+                    const seat = SEATS[j];
+                    const newMean = (histMean * len + seat.score) / (len + 1);
+                    let c = Math.pow(newMean - CLASS_AVG, 2) * 100;
+                    if (st.front && seat.row === 'a') c += 50000;
+                    row.push(c);
+                }
+                costMatrix.push(row);
+            }
+
+            const match = hungarian(costMatrix);
+            state.assign = {};
+            for (let i = 0; i < state.students.length; i++) {
+                const seatIdx = match[i];
+                if (seatIdx !== undefined && seatIdx < SEATS.length) {
+                    state.assign[state.students[i].id] = SEATS[seatIdx].code;
+                }
+            }
+        }
+
+        function getScoreClass(score) {
+            if (score >= 10) return "sc-10";
+            if (score >= 8.5) return "sc-9";
+            if (score >= 6.5) return "sc-7";
+            if (score >= 5.0) return "sc-5";
+            return "sc-3";
+        }
+
+        function render() {
+            document.getElementById('st-count').textContent = state.students.length;
+            document.getElementById('st-round').textContent = state.round;
+
+            // Render Grids
+            const rowIds = { 'c': 'grid-c', 'b': 'grid-b', 'a': 'grid-a' };
+            Object.keys(rowIds).forEach(r => {
+                const el = document.getElementById(rowIds[r]);
+                el.innerHTML = '';
+                const rSeats = SEATS.filter(s => s.row === r);
+                rSeats.forEach(seat => {
+                    const stId = Object.keys(state.assign).find(id => state.assign[id] === seat.code);
+                    const st = stId ? state.students.find(s => s.id == stId) : null;
+                    const isSel = state.selected === seat.code;
+
+                    let newMean = 0, diff = 0;
+                    if (st) {
+                        const m = getMean(st);
+                        const len = st.history ? st.history.length : (state.round - 1);
+                        newMean = (m * len + seat.score) / (len + 1);
+                        diff = newMean - CLASS_AVG;
+                    }
+
+                    const card = document.createElement('div');
+                    card.className = `desk-item ${isSel ? 'selected' : ''}`;
+                    card.onclick = () => tapDesk(seat.code);
+
+                    card.innerHTML = `
+                        <div class="desk-top">
+                            <span class="desk-code">${seat.code.toUpperCase()}</span>
+                            <span class="desk-score ${getScoreClass(seat.score)}">${seat.score.toFixed(1)}</span>
+                        </div>
+                        <div class="desk-name">${st ? st.name : '<em style="color:#8e8e93">Libero</em>'}</div>
+                        <div class="desk-bot">
+                            <span>M: <strong>${newMean.toFixed(1)}</strong></span>
+                            <span class="diff ${diff > 0.1 ? 'diff-pos' : (diff < -0.1 ? 'diff-neg' : 'diff-zero')}">
+                                ${diff > 0 ? '+' : ''}${diff.toFixed(1)}
+                            </span>
+                        </div>
+                    `;
+                    el.appendChild(card);
+                });
+            });
+        }
+
+        function tapDesk(code) {
+            if (!state.selected) {
+                state.selected = code;
+                document.getElementById('swap-code').textContent = code.toUpperCase();
+                document.getElementById('swap-banner').classList.add('active');
+                render();
+            } else if (state.selected === code) {
+                cancelSwap();
+            } else {
+                const c1 = state.selected;
+                const c2 = code;
+
+                const st1Id = Object.keys(state.assign).find(id => state.assign[id] === c1);
+                const st2Id = Object.keys(state.assign).find(id => state.assign[id] === c2);
+
+                if (st1Id && st2Id) {
+                    state.assign[st1Id] = c2;
+                    state.assign[st2Id] = c1;
+                } else if (st1Id) state.assign[st1Id] = c2;
+                else if (st2Id) state.assign[st2Id] = c1;
+
+                cancelSwap();
+                render();
+                showToast(`Scambiati ${c1.toUpperCase()} e ${c2.toUpperCase()}`);
+            }
+        }
+
+        function cancelSwap() {
+            state.selected = null;
+            document.getElementById('swap-banner').classList.remove('active');
+            render();
+        }
+
+        function calcola() {
+            solve();
+            render();
+            showToast("Disposizione calcolata!");
+        }
+
+        function nextRound() {
+            state.students.forEach(st => {
+                const code = state.assign[st.id];
+                const s = SEATS.find(x => x.code === code);
+                if (s) {
+                    if (!st.history) st.history = [];
+                    st.history.push(s.score);
+                }
+            });
+            state.round += 1;
+            solve();
+            render();
+            showToast(`Turno ${state.round} avviato!`);
+        }
+
+        function openNames() {
+            document.getElementById('names-input').value = state.students.map(s => s.name + (s.front ? ' (vista)' : '')).join('\n');
+            document.getElementById('sheet-names').classList.add('active');
+        }
+
+        function closeNames() {
+            document.getElementById('sheet-names').classList.remove('active');
+        }
+
+        function saveNames() {
+            const lines = document.getElementById('names-input').value.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+            if (lines.length === 0) return;
+
+            state.students = lines.map((l, i) => ({
+                id: i + 1,
+                name: l.replace(/\((.*?)\)/g, '').trim(),
+                front: l.toLowerCase().includes('(vista)') || l.toLowerCase().includes('(davanti)'),
+                history: []
+            }));
+
+            closeNames();
+            calcola();
+            showToast("Nomi aggiornati!");
+        }
+
+        function copyWhatsApp() {
+            let t = `🏫 *DISPOSIZIONE BANCHI - TURNO ${state.round}*\n\n`;
+            t += `*FILA C (Davanti):*\n`;
+            SEATS.filter(s => s.row === 'c').forEach(s => {
+                const stId = Object.keys(state.assign).find(id => state.assign[id] === s.code);
+                const st = stId ? state.students.find(x => x.id == stId) : null;
+                t += `• ${s.code.toUpperCase()} (voto ${s.score}): ${st ? st.name : 'Libero'}\n`;
+            });
+            t += `\n*FILA B (Centro):*\n`;
+            SEATS.filter(s => s.row === 'b').forEach(s => {
+                const stId = Object.keys(state.assign).find(id => state.assign[id] === s.code);
+                const st = stId ? state.students.find(x => x.id == stId) : null;
+                t += `• ${s.code.toUpperCase()} (voto ${s.score}): ${st ? st.name : 'Libero'}\n`;
+            });
+            t += `\n*FILA A (Fondo):*\n`;
+            SEATS.filter(s => s.row === 'a').forEach(s => {
+                const stId = Object.keys(state.assign).find(id => state.assign[id] === s.code);
+                const st = stId ? state.students.find(x => x.id == stId) : null;
+                t += `• ${s.code.toUpperCase()} (voto ${s.score}): ${st ? st.name : 'Libero'}\n`;
+            });
+
+            navigator.clipboard.writeText(t).then(() => showToast("Copiato per WhatsApp!")).catch(() => showToast("Testo generato!"));
+        }
+
+        // Init
+        solve();
+        render();
+    </script>
+</body>
+</html>
